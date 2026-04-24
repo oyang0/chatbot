@@ -62,6 +62,10 @@ if prompt := st.chat_input("What is up?"):
             for m in st.session_state.messages
         ],
         stream=True,
+        max_output_tokens=32768,
+        reasoning={"effort": "none"},
+        temperature=0,
+        top_p=1,
     )
 
     with st.chat_message("assistant"):
