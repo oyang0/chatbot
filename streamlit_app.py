@@ -3,8 +3,7 @@ from openai import OpenAI
 
 st.title("💬 Chatbot")
 st.write(
-    "This is a simple chatbot app protected by a password. "
-    "Enter the app password to continue."
+    "This is a simple chatbot app. Enter the app password to continue."
 )
 
 # ---- Password gate ----
@@ -15,14 +14,14 @@ def check_password():
     if st.session_state.authenticated:
         return True
 
-    password = st.text_input("App Password", type="password")
+    password = st.text_input("App password", type="password")
 
     if st.button("Log in"):
         if password == st.secrets["app_password"]:
             st.session_state.authenticated = True
             st.rerun()
         else:
-            st.error("Incorrect password.")
+            st.error("Incorrect password")
 
     return False
 
@@ -31,11 +30,11 @@ if not check_password():
     st.stop()
 
 # Optional logout button
-if st.button("Log out"):
+if st.sidebar.button("Log out"):
     st.session_state.authenticated = False
     st.rerun()
 
-# Create an OpenAI client using a server-side secret instead of user input.
+# Create an OpenAI client using a secret, not user input.
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # Create a session state variable to store chat messages.
@@ -54,7 +53,7 @@ if prompt := st.chat_input("What is up?"):
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Stream the response from OpenAI.
+    # Stream the response from the Responses API.
     stream = client.responses.create(
         model="gpt-5.4",
         input=[
@@ -62,13 +61,16 @@ if prompt := st.chat_input("What is up?"):
             for m in st.session_state.messages
         ],
         stream=True,
-        max_output_tokens=32768,
-        reasoning={"effort": "none"},
-        temperature=0,
-        top_p=1,
     )
 
-    with st.chat_message("assistant"):
-        response = st.write_stream(stream)
+    def text_stream():
+        for event in stream:
+            if event.type == "response.output_text.delta":
+                yield event.delta
 
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    with st.chat_message("assistant"):
+        response = st.write_stream(text_stream())
+
+    st.session_state.messages.append(
+        {"role": "assistant", "content": response}
+    )
