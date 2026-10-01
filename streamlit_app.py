@@ -55,7 +55,7 @@ if prompt := st.chat_input("What is up?"):
 
     # Generate a response using the OpenAI API.
     stream = client.responses.create(
-        model="gpt-6-sol",
+        model="gpt-6.1-sol",
         input=[
             {"role": m["role"], "content": m["content"]}
             for m in st.session_state.messages
