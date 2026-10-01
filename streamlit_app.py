@@ -35,6 +35,7 @@ else:
 			],
 			stream=True,
 			reasoning={"effort": "none"},
+			text={"verbosity": "high"},
 			temperature=0,
 			max_output_tokens=32768,
 			service_tier="flex",
