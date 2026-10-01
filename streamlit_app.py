@@ -13,7 +13,7 @@ if not password:
 elif not hmac.compare_digest(password, st.secrets["APP_PASSWORD"]):
 	st.error("Incorrect password.")
 else:
-	client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+	client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"], timeout=900.0)
 
 	if "messages" not in st.session_state:
 		st.session_state.messages = []
@@ -27,7 +27,7 @@ else:
 		with st.chat_message("user"):
 			st.markdown(prompt)
 
-		stream = client.responses.create(
+		stream = client.with_options(timeout=900.0).responses.create(
 			model="gpt-6-sol",
 			input=[
 				{"role": m["role"], "content": m["content"]}
@@ -37,6 +37,7 @@ else:
 			reasoning={"effort": "none"},
 			temperature=0,
 			max_output_tokens=32768,
+			service_tier="flex",
 		)
 
 		def write_stream():
